@@ -1,0 +1,5 @@
+add cherries
+in row 9, ensure the edge walls are replaced with vacant spaces and when
+pacman moves past left, it appears back on the right and vice versa
+
+add a jpanel for game over, new level or lost live
