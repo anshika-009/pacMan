@@ -8,13 +8,86 @@ import java.util.Random;
 public class pacMan  extends JPanel implements ActionListener, KeyListener{
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+        if(gameOver){
+            loadMap();
+            resetPositions();
+            lives=3;
+            score=0;
+            gameOver=false;
+            gameLoop.start();
+        }
+        //System.out.println("KeyEvent: "+e.getKeyCode());
+        if(e.getKeyCode()==KeyEvent.VK_UP){
+            pacman.updateDirection('U');
 
-    @Override
-    public void keyPressed(KeyEvent e) {}
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_DOWN){
+            pacman.updateDirection('D');
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_RIGHT){
+            pacman.updateDirection('R');
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_LEFT){
+            pacman.updateDirection('L');
+        }
+
+        if(pacman.direction == 'U'){
+            pacman.image = pacmanUpImage;
+        }
+        else if(pacman.direction == 'D'){
+            pacman.image = pacmanDownImage;
+        }
+        else if(pacman.direction == 'L'){
+            pacman.image = pacmanLeftImage;
+        }
+        else if(pacman.direction == 'R'){
+            pacman.image = pacmanRightImage;
+        }
+    }
 
     @Override
     public void keyReleased(KeyEvent e) {
+
+        if(gameOver){
+            loadMap();
+            resetPositions();
+            lives=3;
+            score=0;
+            gameOver=false;
+            gameLoop.start();
+        }
+        //System.out.println("KeyEvent: "+e.getKeyCode());
+        if(e.getKeyCode()==KeyEvent.VK_UP){
+            pacman.updateDirection('U');
+
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_DOWN){
+            pacman.updateDirection('D');
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_RIGHT){
+            pacman.updateDirection('R');
+        }
+        else if(e.getKeyCode()==KeyEvent.VK_LEFT){
+            pacman.updateDirection('L');
+        }
+
+        if(pacman.direction == 'U'){
+            pacman.image = pacmanUpImage;
+        }
+        else if(pacman.direction == 'D'){
+            pacman.image = pacmanDownImage;
+        }
+        else if(pacman.direction == 'L'){
+            pacman.image = pacmanLeftImage;
+        }
+        else if(pacman.direction == 'R'){
+            pacman.image = pacmanRightImage;
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
         if(gameOver){
             loadMap();
             resetPositions();
@@ -145,7 +218,7 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
             "XXXX XXXX XXXX XXXX",
             "OOOX X       X XOOO",
             "XXXX X XXrXX X XXXX",
-            "X       bpo       X",
+            "O       bpo       O",
             "XXXX X XXXXX X XXXX",
             "OOOX X       X XOOO",
             "XXXX X XXXXX X XXXX",
@@ -279,8 +352,18 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
     }
 
     public void move(){
-        pacman.x+=pacman.velocityX;
-        pacman.y+=pacman.velocityY;
+        if((pacman.y==9*tileSize)&& (pacman.x==0 || pacman.x==18*tileSize)){
+            if(pacman.x==0 && pacman.direction=='L'){
+                pacman.x=18*tileSize;
+            }
+            else if(pacman.x==18*tileSize && pacman.direction=='R'){
+                pacman.x=0;
+            }
+        }
+
+
+            pacman.x += pacman.velocityX;
+            pacman.y += pacman.velocityY;
 
         //check wall collisions
         for(Block wall: walls){
