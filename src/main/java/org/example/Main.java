@@ -15,10 +15,6 @@ public class Main {
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        welcome initial=new welcome();
-        frame.add(initial);
-        frame.setVisible(true);
-
         pacMan pacmanGame= new pacMan();
         frame.add(pacmanGame);
         frame.pack();
