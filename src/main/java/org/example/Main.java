@@ -1,5 +1,5 @@
 package org.example;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class Main {
     static void main() {
@@ -14,6 +14,10 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        welcome initial=new welcome();
+        frame.add(initial);
+        frame.setVisible(true);
 
         pacMan pacmanGame= new pacMan();
         frame.add(pacmanGame);
