@@ -7,83 +7,24 @@ import java.util.Random;
 
 public class pacMan  extends JPanel implements ActionListener, KeyListener{
 
+    private boolean keyHeld = false;
+    private Timer stopTimer;
+
     @Override
-    public void keyTyped(KeyEvent e) {
-        if(gameOver){
-            loadMap();
-            resetPositions();
-            lives=3;
-            score=0;
-            gameOver=false;
-            gameLoop.start();
-        }
-        //System.out.println("KeyEvent: "+e.getKeyCode());
-        if(e.getKeyCode()==KeyEvent.VK_UP){
-            pacman.updateDirection('U');
-
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_DOWN){
-            pacman.updateDirection('D');
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_RIGHT){
-            pacman.updateDirection('R');
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_LEFT){
-            pacman.updateDirection('L');
-        }
-
-        if(pacman.direction == 'U'){
-            pacman.image = pacmanUpImage;
-        }
-        else if(pacman.direction == 'D'){
-            pacman.image = pacmanDownImage;
-        }
-        else if(pacman.direction == 'L'){
-            pacman.image = pacmanLeftImage;
-        }
-        else if(pacman.direction == 'R'){
-            pacman.image = pacmanRightImage;
-        }
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if(stopTimer != null) stopTimer.stop();
 
-        if(gameOver){
-            loadMap();
-            resetPositions();
-            lives=3;
-            score=0;
-            gameOver=false;
-            gameLoop.start();
-        }
-        //System.out.println("KeyEvent: "+e.getKeyCode());
-        if(e.getKeyCode()==KeyEvent.VK_UP){
-            pacman.updateDirection('U');
-
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_DOWN){
-            pacman.updateDirection('D');
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_RIGHT){
-            pacman.updateDirection('R');
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_LEFT){
-            pacman.updateDirection('L');
-        }
-
-        if(pacman.direction == 'U'){
-            pacman.image = pacmanUpImage;
-        }
-        else if(pacman.direction == 'D'){
-            pacman.image = pacmanDownImage;
-        }
-        else if(pacman.direction == 'L'){
-            pacman.image = pacmanLeftImage;
-        }
-        else if(pacman.direction == 'R'){
-            pacman.image = pacmanRightImage;
-        }
+        stopTimer = new Timer(50, ev -> {
+            keyHeld = false;
+            pacman.velocityX = 0;
+            pacman.velocityY = 0;
+            stopTimer.stop();
+        });
+        stopTimer.setRepeats(false);
+        stopTimer.start();
     }
 
     @Override
@@ -96,6 +37,7 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
             gameOver=false;
             gameLoop.start();
         }
+        keyHeld=true;
     //System.out.println("KeyEvent: "+e.getKeyCode());
     if(e.getKeyCode()==KeyEvent.VK_UP){
         pacman.updateDirection('U');
@@ -123,7 +65,6 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
         else if(pacman.direction == 'R'){
             pacman.image = pacmanRightImage;
         }
-
     }
 
     public class Block{
@@ -206,6 +147,9 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
     private Image pacmanLeftImage;
     private Image pacmanRightImage;
 
+    private boolean mouthOpen = true;
+    private int animationCounter = 0;
+    private final int animationSpeed = 3; // toggles every 3 game-loop ticks
 
     // X-wall, O-skip, P-pacman, ''-food
     private String[] tileMap = {
@@ -264,6 +208,7 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
         pacmanLeftImage = new ImageIcon(getClass().getResource("/pacmanLeft.png")).getImage();
         pacmanRightImage = new ImageIcon(getClass().getResource("/pacmanRight.png")).getImage();
 
+         // toggles every 3 game-loop ticks
         loadMap();
 
         for(Block ghost: ghosts){
@@ -273,8 +218,13 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
 
 
         gameLoop=new Timer(50,this);        //20 frames per second
+//        gameLoop.start();
+    }
+
+    public void startGame(){
         gameLoop.start();
     }
+
 
     public void loadMap(){
          walls= new HashSet<Block>();
@@ -326,7 +276,15 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
     }
 
     public void draw(Graphics g){
-        g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if(mouthOpen){
+            g2.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
+        } else {
+            g2.setColor(Color.YELLOW);
+            g2.fillOval(pacman.x, pacman.y, pacman.width-6, pacman.height-6);
+        }
 
         for(Block ghost:ghosts){
             g.drawImage(ghost.image,ghost.x, ghost.y, ghost.width, ghost.height, null);
@@ -360,8 +318,6 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
                 pacman.x=0;
             }
         }
-
-
             pacman.x += pacman.velocityX;
             pacman.y += pacman.velocityY;
 
@@ -427,6 +383,7 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
     }
 
     public void resetPositions(){
+        pacman.image= pacmanRightImage;
         pacman.reset();
         pacman.velocityX=0;
         pacman.velocityY=0;
@@ -440,8 +397,22 @@ public class pacMan  extends JPanel implements ActionListener, KeyListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         move();
+        updateChompAnimation();
         repaint();
         if(gameOver){gameLoop.stop();}
+    }
+
+    private void updateChompAnimation(){
+        if(keyHeld){
+            animationCounter++;
+            if(animationCounter >= animationSpeed){
+                mouthOpen = !mouthOpen;
+                animationCounter = 0;
+            }
+        } else {
+            mouthOpen = true; // freeze with mouth open (or closed, your call) when idle
+            animationCounter = 0;
+        }
     }
 
 }
